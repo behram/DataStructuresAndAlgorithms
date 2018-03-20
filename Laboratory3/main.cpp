@@ -216,6 +216,38 @@ void showListFromTail(List2W& l) {
     cout << endl;
 }
 
+void showBool(bool val) {
+    if (val)
+        cout << "true" << endl;
+    else
+        cout << "false" << endl;
+}
+
+void checkEvenValues(List2W& l) {
+
+    if (l.head==NULL) {
+        cout << endl;
+        return;
+    }
+
+    Element *el = l.head;
+    if(el->key%2 == 1){
+        showBool(false);
+        return;
+    }
+
+    while(el->next!=l.head)
+    {
+        el = el->next;
+        if(el->key%2 == 1){
+            showBool(false);
+            return;
+        }
+    }
+    showBool(true);
+    cout << endl;
+}
+
 void clearList(List2W& l) {
 
     int len = l.length, t;
@@ -224,7 +256,7 @@ void clearList(List2W& l) {
 
 }
 
-void addList(List2W& l1, List2W& l2) {
+void addListOld(List2W& l1, List2W& l2) {
 
     if (l1.length==l2.length)
     {
@@ -248,8 +280,35 @@ void addList(List2W& l1, List2W& l2) {
         e = e->next;
     }
     clearList(l2);
+}
 
+void addList(List2W& l1,List2W& l2){
+    if (l1.head == NULL)
+    {
+        l1=l2;
+        l2.head = NULL;
+    }
+    else if (l2.head == NULL)
+    {
+        return;
+    }
+    else if (l1.head == l2.head)
+    {
+        return;
+    }
+    else
+    {
+        Element *last1 = l1.head->prev;
+        Element *last2 = l2.head->prev;
 
+        last1->next = l2.head;
+        l2.head->prev = last1;
+
+        last2->next = l1.head;
+        l1.head->prev = last2;
+
+        l2.head = NULL;
+    }
 }
 
 bool doubleElements(List2W & l)
@@ -287,13 +346,6 @@ bool doubleElements(List2W & l)
 
 }
 
-
-void showBool(bool val) {
-	if (val)
-		cout << "true" << endl;
-	else
-		cout << "false" << endl;
-}
 
 bool isCommand(const string command, const char *mnemonic) {
 	return command == mnemonic;
@@ -384,7 +436,7 @@ int main() {
 		// read next argument, one int value
 		stream >> value;
 
-		if (isCommand(command, "FV")) //*
+		if (isCommand(command, "FV"))
 		{
 			int ret;
 			ret = findValue(list[currentL], value);
@@ -392,11 +444,17 @@ int main() {
 			continue;
 		}
 
-		if (isCommand(command, "RV")) //*
+		if (isCommand(command, "RV"))
 		{
 			removeAllValue(list[currentL], value);
 			continue;
 		}
+
+        if (isCommand(command, "EV"))
+        {
+            checkEvenValues(list[currentL]);
+            continue;
+        }
 
 
 		if (isCommand(command, "AD")) //*
