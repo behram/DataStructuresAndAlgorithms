@@ -1,370 +1,434 @@
 #include<iostream>
-#include<string.h>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
-struct Element{
-    int key;
-    Element *next;
-    Element *prev;
+// Two-way unordered cycled list without sentinel
+struct Element {
+	int key;
+	Element *prev, *next;
 };
 
-struct List2W{
-    Element *head;
+struct List2W {
+	Element *head;
+	int length;
 };
 
-void init(List2W& l){
-    l.head = new Element;
-    l.head = NULL;
+void init(List2W& l) {
+	l.head = NULL;
+	l.length=0;
 }
 
-void insertHead(List2W& l, int x){
-    Element *fresh = new Element;
-    Element *p = l.head;
-    fresh->key = x;
-    if (p == NULL){
-        fresh->next = fresh;
-        fresh->prev = fresh;
-    } else {
-        fresh->next = l.head;
-        fresh->prev = fresh->next->prev;
-        fresh->prev->next = fresh;
-        fresh->next->prev = fresh;
+void insertHead(List2W& l, int x) {
+	Element *newEl = new Element;
+	newEl->key = x;
+	if (l.head==NULL)
+	{
+		newEl->next = newEl;
+		newEl->prev = newEl;
+		l.head = newEl;
+	}
+	else if (l.head->next!=l.head)
+	{
+		l.head->prev->next = newEl;
+		newEl->prev = l.head->prev;
+		newEl->next = l.head;
+		l.head->prev = newEl;
+		l.head = newEl;
+	} else{
+        newEl->next = l.head;
+        newEl->prev = l.head;
+        l.head->next = newEl;
+        l.head->prev = newEl;
+        l.head = newEl;
     }
-    l.head = fresh;
+    l.length++;
 }
 
-bool deleteHead(List2W& l, int &value){
-    Element *p = l.head;
-    if (p==NULL) return false;
+bool deleteHead(List2W& l, int &value) {
+	if (l.head==NULL)
+		return false;
+	Element *del = l.head;
+	value = del->key;
+	if (del->next == del)
+	{
+		delete del;
+		l.head = NULL;
+	}
+	else
+	{
+		l.head->prev->next = l.head->next;
+		l.head->next->prev = l.head->prev;
+		l.head = l.head->next;
+		delete del;
+	}
+	l.length--;
+	return true;
+}
 
-    Element *temp;
-    temp = l.head;
-    value=temp->key;
-    if (l.head == p->next)
+void insertTail(List2W& l, int x) {
+
+	if (l.head == NULL)
+    {
+        insertHead(l,x);
+        return;
+    }
+
+	Element *newEl = new Element;
+	newEl->key = x;
+
+	if (l.head->next!=l.head)
+    {
+        newEl->next = l.head;
+        newEl->prev = l.head->prev;
+        l.head->prev->next = newEl;
+        l.head->prev = newEl;
+    }else
+    {
+        newEl->next =l.head;
+        newEl->prev = l.head;
+        l.head->prev = newEl;
+        l.head->next = newEl;
+    }
+    l.length++;
+
+}
+
+
+bool deleteTail(List2W& l, int &value) {
+    if (l.head == NULL)
+        return false;
+    if (l.head->next == l.head)
+    {
+        Element *del = l.head;
+        value = del->key;
         l.head = NULL;
-    else {
-        p->next->prev = p->prev;
-        p->prev->next = p->next;
-        l.head = p->next;
+        delete del;
+    }else
+    {
+        Element *del = l.head->prev;
+        value = del->key;
+        del->prev->next = l.head;
+        l.head->prev = del->prev;
+        delete del;
     }
-    delete temp;
+    l.length--;
+    return true;
+
+}
+
+int findValue(List2W& l, int value) {
+
+    if (l.head == NULL)
+        return -1;
+    Element *el = l.head;
+    int pos = 0;
+
+    while (el->next != l.head)
+    {
+        if (el->key==value)
+        {
+            return pos;
+        }
+        pos++;
+        el = el->next;
+    }
+    if (el->key == value)
+    {return pos;}
+
+
+	return -1;
+}
+
+
+bool removeElement(List2W& l, int x)
+{
+    int holder;
+    if (x==0)
+    {
+        deleteHead(l, holder);
+        return true;
+    }else if (x==l.length-1)
+    {
+        deleteTail(l, holder);
+        return true;
+    }else if (x>l.length-1 || x<0)
+    {
+        return false;
+    }
+    else
+    {
+        Element *del = l.head;
+        for (int i = 0; i<x; i++)
+        {
+            del = del-> next;
+        }
+        del->next->prev = del->prev;
+        del->prev->next = del->next;
+        delete del;
+    }
+    l.length--;
     return true;
 }
 
-void insertTail(List2W& l, int x){
-    Element *fresh = new Element;
-    Element *p = l.head;
-    fresh->key = x;
-    if (p == NULL){
-        fresh->next = fresh;
-        fresh->prev = fresh;
-        l.head = fresh;
-    } else {
-        p = p->prev;
-        fresh->next = p->next;
-        fresh->prev = p;
-        p->next = fresh;
-        fresh->next->prev = fresh;
-    }
-}
 
-bool deleteTail(List2W& l, int &value){
-    Element *p = l.head;
-    if (p==NULL) return false;
-    p=p->prev;
-    Element *temp;
-    temp = p;
-    value=temp->key;
-    if (l.head == p)
-        l.head = NULL;
-    else
-    {
-        p->next->prev = p->prev;
-        p->prev->next = p->next;
-    }
-    delete temp;
-    return true;
-}
+void removeAllValue(List2W& l, int value) {
 
-int findValue(List2W& l, int value){
-    Element *p = l.head;
-    int counter = 0;
-    if (p!=NULL)
-        while (true)
-        {
-            if (p->key == value)
-                return counter;
-            p = p->next;
-            if (p==l.head)
-                break;
-            counter++;
-        }
-    return -1;
-}
-
-void removeAllValue(List2W& l, int value){
-    if (l.head!=NULL){
-        bool isBreak = true;
-        Element *p = l.head;
-        Element *temp;
-        if (p!=NULL)
-            while (true)
-            {
-                if (p->key == value){
-                    temp = p;
-                    if (p == l.head){
-                        if (p->next == p) {
-                            l.head = NULL;
-                            delete p;
-                            break;
-                        }else{
-                            l.head = p->next;
-                            isBreak = false;
-                        }
-                    }
-
-                    p->next->prev = p->prev;
-                    p->prev->next = p->next;
-                    p = p->next;
-
-                    delete temp;
-                }
-                else
-                {
-                    p = p->next;
-                }
-                if (p==l.head && isBreak)
-                    break;
-                else
-                    isBreak = true;
-            }
-    }
-}
-
-void showListFromHead(List2W& l){
-    Element *p = l.head;
-    if (p!=NULL)
-        while (true)
-        {
-            cout<<p->key<<",";
-            p = p->next;
-            if (p==l.head) break;
-        }
-    cout<<endl;
-}
-
-void deleteOddPositions(List2W& l){
-    Element *p = l.head;
-    int counter = 1;
-    if (p!=NULL){
-        while (true)
-        {
-            if(counter%2 == 0){
-
-            }
-            cout<<p->key<<",";
-            p = p->next;
-            if (p==l.head) break;
-        }
-    }
-    cout<<endl;
-}
-
-void showListFromTail(List2W& l){
-    Element *p = l.head;
-    if (p!=NULL)
-    {
-        p=p->prev;
-        while (true)
-        {
-            cout<<p->key<<",";
-            if (p==l.head) break;
-            p = p->prev;
-        }
-    }
-    cout<<endl;
-}
-
-void clearList(List2W& l){
-    if (l.head!=NULL)
-    {
-        Element *p = l.head;
-        int v;
-        while (p!=NULL)
-        {
-            deleteHead(l,v);
-            if (l.head->next==l.head)
-            {
-                deleteHead(l,v);
-                break;
-            }
-            p = p->next;
-        }
-    }
-}
-
-void addList(List2W& l1,List2W& l2){
-    if (l1.head == NULL)
-    {
-        l1=l2;
-        l2.head = NULL;
-    }
-    else if (l2.head == NULL)
-    {
-        return;
-    }
-    else if (l1.head == l2.head)
-    {
-        return;
-    }
-    else
-    {
-        Element *last1 = l1.head->prev;
-        Element *last2 = l2.head->prev;
-
-        last1->next = l2.head;
-        l2.head->prev = last1;
-
-        last2->next = l1.head;
-        l1.head->prev = last2;
-
-        l2.head = NULL;
-    }
-}
-void showBool(bool val){
-    if(val)
-        cout << "true" << endl;
-    else
-        cout << "false" << endl;
-}
-
-bool isCommand(const char *command,const char *mnemonic){
-    return strcmp(command,mnemonic)==0;
-}
-
-int main(){
-    const int commandSize=2;
-    const int MAXLINE=100;
-    char line[MAXLINE];
-    char command[commandSize+1];
-    List2W *list;
-    list=new List2W[1];
-    int currentL=0;
-    int value;
-    command[commandSize]='\0';
-    while(true){
-        cin >> command[0];
-        if(command[0]=='#')
-        {
-            cin.getline(line, MAXLINE);
-            continue;
-        }
-        cin >> command[1];
-
-        if(isCommand(command,"HA")){
-            cout << "END OF EXECUTION" << endl;
+    int pos;
+    while (1){
+        pos = findValue(l,value);
+        if (pos == -1)
             break;
-        }
-
-        if(isCommand(command,"DH"))
-        {
-            int value=-9999;
-            bool retBool=deleteHead(list[currentL],value);
-            if(retBool)
-                cout << value << endl;
-            else
-                showBool(false);
-            continue;
-        }
-        if(isCommand(command,"DT"))
-        {
-            int value=-9999;
-            bool retBool=deleteTail(list[currentL],value);
-            if(retBool)
-                cout << value << endl;
-            else
-                showBool(false);
-            continue;
-        }
-
-        if(isCommand(command,"ST"))
-        {
-            showListFromTail(list[currentL]);
-            continue;
-        }
-
-        if(isCommand(command,"SH"))
-        {
-            showListFromHead(list[currentL]);
-            continue;
-        }
-
-        if(isCommand(command,"DE"))
-        {
-            deleteOddPositions(list[currentL]);
-            continue;
-        }
-
-        if(isCommand(command,"CL"))
-        {
-            clearList(list[currentL]);
-            continue;
-        }
-
-        if(isCommand(command,"IN"))
-        {
-            init(list[currentL]);
-            continue;
-        }
-
-        cin >> value;
-
-        if(isCommand(command,"FV"))
-        {
-            int ret;
-            ret=findValue(list[currentL],value);
-            cout << ret << endl;
-            continue;
-        }
-
-        if(isCommand(command,"RV"))
-        {
-            removeAllValue(list[currentL],value);
-            continue;
-        }
-
-
-        if(isCommand(command,"CH"))
-        {
-            currentL=value;
-            continue;
-        }
-
-        if(isCommand(command,"IH"))
-        {
-            insertHead(list[currentL],value);
-            continue;
-        }
-
-        if(isCommand(command,"IT"))
-        {
-            insertTail(list[currentL],value);
-            continue;
-        }
-
-        if(isCommand(command,"GO"))
-        {
-            list=new List2W[value];
-            continue;
-        }
-
-        if(isCommand(command,"AD"))
-        {
-            addList(list[currentL],list[value]);
-            continue;
-        }
-        cout << "wrong argument in test: " << command << endl;
-        return 1;
+        removeElement(l,pos);
     }
+}
+
+void showListFromHead(List2W& l) {
+    if (l.head==NULL) {
+        cout << endl;
+        return;}
+
+    Element *el = l.head;
+    cout << el->key << ",";
+
+    while(el->next!=l.head)
+    {
+        el = el->next;
+        cout << el->key << ",";
+    }
+    cout << endl;
+}
+
+void showListFromTail(List2W& l) {
+    if (l.head==NULL){
+        cout << endl;
+        return;}
+
+    Element *el = l.head->prev;
+    cout << el->key << ",";
+
+    while(el->prev!=l.head->prev)
+    {
+        el = el->prev;
+        cout << el->key << ",";
+    }
+    cout << endl;
+}
+
+void clearList(List2W& l) {
+
+    int len = l.length, t;
+    for (int i = 0; i<len; i++)
+        deleteTail(l,t);
+
+}
+
+void addList(List2W& l1, List2W& l2) {
+
+    if (l1.length==l2.length)
+    {
+        Element *e1 = l1.head;
+        Element *e2 = l2.head;
+        int x =0;
+        for (int i = 0; i<=l1.length; i++)
+        {
+            if(e1->key==e2->key)
+                x++;
+            e1 = e1->next;
+            e2 = e2->next;
+        }
+        if (x==l1.length)
+            return;
+    }
+    Element *e = l2.head;
+    for (int i = 0 ; i<l2.length ; i++)
+    {
+        insertTail(l1,e->key);
+        e = e->next;
+    }
+    clearList(l2);
+
+
+}
+
+bool doubleElements(List2W & l)
+{
+    if(l.head==NULL)
+        return false;
+    int len;
+    Element *el = l.head;
+    if (l.length>1)
+    {
+        len = l.length;
+        for(int i = 0; i< len; i++){
+            Element *addin = new Element;
+            addin->key = el->key;
+
+            addin->prev =el;
+            addin->next =el->next;
+            el->next->prev = addin;
+            el->next = addin;
+            el = el->next->next;
+
+            l.length++;
+        }
+    }else{
+        Element *addin = new Element;
+        addin->key = el->key;
+        el->next = addin;
+        el->prev = addin;
+        addin->next = el;
+        addin->prev = el;
+        l.length++;
+    }
+
+    return true;
+
+}
+
+
+void showBool(bool val) {
+	if (val)
+		cout << "true" << endl;
+	else
+		cout << "false" << endl;
+}
+
+bool isCommand(const string command, const char *mnemonic) {
+	return command == mnemonic;
+}
+
+int main() {
+	string line;
+	string command;
+	List2W *list;
+    list = new List2W[1];
+	int currentL = 0;
+	int value;
+	cout << "START" << endl;
+	while (true) {
+		getline(cin, line);
+		std::stringstream stream(line);
+		stream >> command;
+		if (line == "" || command[0] == '#')
+		{
+			// ignore empty line and comment
+			continue;
+		}
+
+		// copy line on output with exclamation mark
+		cout << "!" << line << endl;;
+
+		// change to uppercase
+		command[0] = toupper(command[0]);
+		command[1] = toupper(command[1]);
+
+		if (isCommand(command, "HA")) {
+			cout << "END OF EXECUTION" << endl;
+			break;
+		}
+
+
+		// zero-argument command
+		if (isCommand(command, "DH")) //*
+		{
+			int retValue;
+			bool retBool = deleteHead(list[currentL], retValue);
+			if (retBool)
+				cout << retValue << endl;
+			else
+				showBool(retBool);
+			continue;
+		}
+		if (isCommand(command, "DT")) //*
+		{
+			int retValue;
+			bool retBool = deleteTail(list[currentL], retValue);
+			if (retBool)
+				cout << retValue << endl;
+			else
+				showBool(retBool);
+			continue;
+		}
+
+		if (isCommand(command, "SH")) //*
+		{
+			showListFromHead(list[currentL]);
+			continue;
+		}
+		if (isCommand(command, "DE"))
+        {
+            doubleElements(list[currentL]);
+            continue;
+        }
+
+		if (isCommand(command, "ST")) //*
+		{
+			showListFromTail(list[currentL]);
+			continue;
+		}
+
+		if (isCommand(command, "CL")) //*
+		{
+			clearList(list[currentL]);
+			continue;
+		}
+
+		if (isCommand(command, "IN")) //*
+		{
+			init(list[currentL]);
+			continue;
+		}
+
+		// read next argument, one int value
+		stream >> value;
+
+		if (isCommand(command, "FV")) //*
+		{
+			int ret;
+			ret = findValue(list[currentL], value);
+			cout << ret << endl;
+			continue;
+		}
+
+		if (isCommand(command, "RV")) //*
+		{
+			removeAllValue(list[currentL], value);
+			continue;
+		}
+
+
+		if (isCommand(command, "AD")) //*
+		{
+			addList(list[currentL], list[value]);
+			continue;
+		}
+
+		if (isCommand(command, "CH")) //*
+		{
+			currentL = value;
+			continue;
+		}
+
+		if (isCommand(command, "IH")) //*
+		{
+			insertHead(list[currentL], value);
+			continue;
+		}
+
+		if (isCommand(command, "IT")) //*
+		{
+			insertTail(list[currentL], value);
+			continue;
+		}
+
+		if (isCommand(command, "GO")) //*
+		{
+			list = new List2W[value];
+			continue;
+		}
+
+		cout << "wrong argument in test: " << command << endl;
+	}
 }
