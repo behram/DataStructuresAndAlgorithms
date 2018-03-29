@@ -7,8 +7,7 @@
 using namespace std;
 
 void showArray(int array[], int size){
-    for (int i = 0; i<size; i++)
-    {
+    for (int i = 0; i<size; i++) {
         cout << array[i] << ',';
     }
     cout << endl;
@@ -16,8 +15,7 @@ void showArray(int array[], int size){
 
 void insertSort(int array[], int size){
     int temp, j, i;
-    for(i = size-2; i >= 0; i--)
-    {
+    for(i = size-2; i >= 0; i--) {
         temp = array[i];
 
         for (j = i; j < size-1 && temp > array[j+1]; j++)
@@ -28,32 +26,28 @@ void insertSort(int array[], int size){
         showArray(array,size);
     }
 }
-void merge(int array[], int nFrom, int mid, int nTo){
+
+void mergeArray(int array[], int nFrom, int mid, int nTo){
     int *left = new int[mid-nFrom+1];
     int *right = new int[nTo-mid+1];
     int i;
 
-    for (i = 0; i < mid-nFrom; i++)
-    {
+    for (i = 0; i < mid-nFrom; i++) {
         left[i] = array[nFrom+i];
     }
     left[mid-nFrom] = INT_MAX;
-    for (i = 0; i< nTo-mid; i++)
-    {
+    for (i = 0; i< nTo-mid; i++) {
         right[i] = array[mid+i];
     }
     right[nTo-mid] = INT_MAX;
     int g = 0;
     int d = 0;
-    for (int i = nFrom; i< nTo; i++)
-    {
+    for (int i = nFrom; i< nTo; i++) {
         if (left[g]<right[d])
         {
             array[i] = left[g];
             g++;
-        }
-        else
-        {
+        } else {
             array[i] = right[d];
             d++;
         }
@@ -61,7 +55,6 @@ void merge(int array[], int nFrom, int mid, int nTo){
 
     delete[] left;
     delete[] right;
-
 }
 
 void bubbleSort(int array[], int size){
@@ -82,36 +75,29 @@ void bubbleSort(int array[], int size){
     }
 }
 
-
 void mergeSortIter(int array[], int size){
     int mid, end, i;
 
-    for (i=1; i < size; i*=2)
-    {
+    for (i=1; i < size; i*=2) {
         int k;
-        for (k = 0; k<size; k+=2*i)
-        {
+        for (k = 0; k<size; k+=2*i) {
             mid = k+i;
             end = k+2*i;
-            if (end>size)
-            {
+            if (end>size) {
                 end = size;
-                if (mid > size)
-                {
+                if (mid > size) {
                     mid = size;
                 }
             }
-            merge(array,k, mid, end);
+            mergeArray(array,k, mid, end);
         }
         showArray(array, size);
     }
 }
 
-
 int * loadArray(int size){
     int *arr = new int[size];
-    for (int i = 0; i<size; i++)
-    {
+    for (int i = 0; i<size; i++) {
         cin >> arr[i];
     }
     return arr;
