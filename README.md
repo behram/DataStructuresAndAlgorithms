@@ -13,3 +13,13 @@ Related Links;
 
  - https://visualgo.net/bn/sorting
  - https://brilliant.org/practice/insertion-sort/?chapter=intro-to-algorithms
+
+### Usage
+
+```
+# git clone git@github.com:behram/DataStructuresAndAlgorithms.git
+# cd DataStructuresAndAlgorithms
+# cd Laboratory1
+# g++ main.cpp -o Lab1.o
+# ./Lab1.o
+```
