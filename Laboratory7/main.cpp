@@ -1,8 +1,8 @@
 #include<iostream>
-#include<string.h>
+#include <string>
+#include <sstream>
 
 using namespace std;
-
 
 struct Element{
     int key;
@@ -18,7 +18,7 @@ struct Node{
 
 void removeNode(Node * node);
 
-Node * createNode (Element elem, Node * PARENT=NULL){
+Node * createNode(Element elem, Node * PARENT=NULL){
     Node *newNode = new Node;
     newNode->elem.key=elem.key;
     newNode->elem.value=elem.value;
@@ -37,22 +37,22 @@ void init(BST & tree){
     tree.root=NULL;
 }
 
-bool insertElem(Node *NODE, Element elem){
+bool insertElem(Node *node, Element elem){
 
-    if (elem.key < NODE->elem.key){
-        if(NODE->left)
-            return insertElem(NODE->left,elem);
+    if (elem.key < node->elem.key){
+        if(node->left)
+            return insertElem(node->left,elem);
 
-        NODE->left = createNode(elem, NODE);
+        node->left = createNode(elem, node);
         return true;
     }
     else{
-        if (elem.key > NODE->elem.key)
+        if (elem.key > node->elem.key)
         {
-            if(NODE->right)
-                return insertElem(NODE->right,elem);
+            if(node->right)
+                return insertElem(node->right,elem);
 
-            NODE->right = createNode(elem, NODE);
+            node->right = createNode(elem, node);
             return true;
         }
     }
@@ -165,13 +165,12 @@ bool removeKey(BST & tree, int key, Element &elem){
 
     Node * x = treeSearch(tree.root, key);
 
-
     if (x == NULL)
         return false;
 
-    if(!x->left && !x->right){       //if no child
+    if(!x->left && !x->right){
         if(!x->parent){
-            elem.key=x->elem.key;   //it is root
+            elem.key=x->elem.key;
             elem.value=x->elem.value;
             delete x;
             init(tree);
@@ -282,6 +281,20 @@ int height(BST & tree){
     return height(tree.root);
 }
 
+int countLeaves(Node *node)
+{
+    if(!node)
+        return 0;
+    if(!node->left && !node->right)
+        return 1;
+    else
+        return countLeaves(node->left) + countLeaves(node->right);
+}
+
+int countLeaves(BST & tree){
+    return countLeaves(tree.root);
+}
+
 int functionA(BST & tree){
     return -1;
 }
@@ -302,39 +315,40 @@ void showBool(bool val){
         cout << "false" << endl;
 }
 
-bool isCommand(const char *command,const char *mnemonic){
-    return strcmp(command,mnemonic)==0;
+bool isCommand(const string command,const char *mnemonic){
+    return command==mnemonic;
 }
 
-
 int main(){
-    const int commandSize=2;
-    const int MAXLINE=100;
-    char line[MAXLINE];
-    char command[commandSize+1];
-
-    BST *tree = NULL;
+    string line;
+    string command;
+    BST *tree;
     int currentT=0;
     int value;
-    command[commandSize]='\0';
     cout << "START" << endl;
     while(true){
-        cin >> command[0];
-        if(command[0]=='#')
+        getline(cin,line);
+        std::stringstream stream(line);
+        stream >> command;
+        if(line=="" || command[0]=='#')
         {
-            cin.getline(line, MAXLINE);
+            // ignore empty line and comment
             continue;
         }
-        cin >> command[1];
 
+        // copy line on output with exclamation mark
+        cout << "!" << line << endl;;
+
+        // change to uppercase
         command[0]=toupper(command[0]);
         command[1]=toupper(command[1]);
 
+        // zero-argument command
         if(isCommand(command,"HA")){
             cout << "END OF EXECUTION" << endl;
             break;
         }
-        // zero-argument command
+
         if(isCommand(command,"SI"))
         {
             showInorder(tree[currentT]);
@@ -377,6 +391,12 @@ int main(){
             continue;
         }
 
+        if(isCommand(command,"LE"))
+        {
+            cout << countLeaves(tree[currentT]) << endl;
+            continue;
+        }
+
         if(isCommand(command,"FA"))
         {
             cout << functionA(tree[currentT]) << endl;
@@ -384,13 +404,12 @@ int main(){
         }
 
         // read next argument, one int value
-        cin >> value;
-
+        stream >> value;
 
         if(isCommand(command,"IE"))
         {
             int variable2;
-            cin >> variable2;
+            stream >> variable2;
             Element elem;
             elem.key=value;
             elem.value=variable2;
@@ -451,6 +470,6 @@ int main(){
         }
 
         cout << "wrong argument in test: " << command << endl;
-        return 1;
     }
+    return 0;
 }
