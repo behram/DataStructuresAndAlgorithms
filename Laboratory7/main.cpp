@@ -428,6 +428,16 @@ int main(){
             continue;
         }
 
+        if(isCommand(command,"FK"))
+        {
+            Element elem;
+            bool ret=findKey(tree[currentT], value, elem);
+            if(ret)
+                cout << elem.key << '(' << elem.value << ')' << endl;
+            else
+                cout << "false" << endl;
+            continue;
+        }
         if(isCommand(command,"RK"))
         {
             Element elem;
