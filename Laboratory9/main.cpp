@@ -29,7 +29,7 @@ void init(DSF & dsf, int size){
 
 void makeOneElementSets(DSF & dsf){
     for(int i = 0; i< dsf.size; i++){
-        dsf.arr[i].rank = 0;
+        dsf.arr[i].rank = i;
         dsf.arr[i].parent = i;
     }
 }
