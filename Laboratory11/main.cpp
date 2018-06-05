@@ -16,7 +16,6 @@ struct Graph{
     int vertices;
 };
 
-
 double getWeight(Graph &g, int u, int v){
     return g.vertice[u].adjacency[v];
 }
@@ -82,22 +81,22 @@ void showAsArrayOfLists(Graph &g){
     }
 }
 
-
 void searchDepth(Graph &g, int current, bool visited[]){
     visited[current] = true;
     cout << current << ",";
 
-    for(map<int, double>::iterator it = g.vertice[current].adjacency.begin(); it != g.vertice[current].adjacency.end(); it++)
-        if (!visited[it->first])
+    for(map<int, double>::iterator it = g.vertice[current].adjacency.begin(); it != g.vertice[current].adjacency.end(); it++){
+        if (!visited[it->first]){
             searchDepth(g, it->first, visited);
+        }
+    }
 }
-
-
 
 void DFS(Graph &g, int current){
     bool *visited = new bool[g.vertices];
-    for (int i = 0; i < g.vertices; i++)
+    for (int i = 0; i < g.vertices; i++){
         visited[i] = false;
+    }
 
     searchDepth(g, current, visited);
 
@@ -106,24 +105,20 @@ void DFS(Graph &g, int current){
 
 void BFS(Graph &g, int current){
     bool *visited = new bool[g.vertices];
-    for(int i = 0; i < g.vertices; i++)
+    for(int i = 0; i < g.vertices; i++){
         visited[i] = false;
-
+    }
     list<int> queue;
-
     visited[current] = true;
     queue.push_back(current);
 
-    while(!queue.empty())
-    {
+    while(!queue.empty()) {
         current = queue.front();
         cout << current << ",";
         queue.pop_front();
 
-        for(map<int, double>::iterator it = g.vertice[current].adjacency.begin(); it != g.vertice[current].adjacency.end(); it++)
-        {
-            if(!visited[it->first])
-            {
+        for(map<int, double>::iterator it = g.vertice[current].adjacency.begin(); it != g.vertice[current].adjacency.end(); it++) {
+            if(!visited[it->first]) {
                 visited[it->first] = true;
                 queue.push_back(it->first);
             }
@@ -135,7 +130,6 @@ void BFS(Graph &g, int current){
 bool isCommand(const string command,const char *mnemonic){
     return command==mnemonic;
 }
-
 
 int main(){
     string line;
