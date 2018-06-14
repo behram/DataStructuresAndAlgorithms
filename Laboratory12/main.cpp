@@ -1,130 +1,141 @@
-#define INFINITY 10000000
-#include <iostream>
-#include <string.h>
+#include<iostream>
 #include <sstream>
-#include <map>
-#include <list>
+#include <stdlib.h>
+#include <stdio.h>
+#include <limits.h>
 
 using namespace std;
 
-struct Vertice{
-    map < int, double > adjacency;
-};
+#define INFINITY 10000000
 
 struct Graph{
-    Vertice * vertice;
-    int vertices;
+    float ** edges;
+    int u;
 };
 
-double getWeight(Graph &g, int u, int v){
-    return g.vertice[u].adjacency[v];
+void loadGraph(Graph &g, int n, int m){
+
+    g.u = n;
+
+    float ** temp = new float*[n];
+    for (int i = 0; i<n ; i++)
+    {
+        temp[i] = new float[n];
+    }
+    g.edges = temp;
+    int a,b;
+    float c;
+
+    for (int i = 0; i<n; i++)
+    {
+        for (int j = 0; j<n; j++)
+        {
+            g.edges[i][j] = INFINITY;
+        }
+    }
+
+    while (scanf("%d %d %f", &a,&b,&c)!= 0)
+    {
+        g.edges[a][b] = c;
+    }
 }
 
 void insertEdge(Graph &g, int u, int v, double weight){
-    g.vertice[u].adjacency[v] = weight;
-}
 
-void loadGraph(Graph &g, int n, int m){
-    g.vertices = n;
-    g.vertice = new Vertice[n];
-
-    int u,v,w;
-    for (int i = 0; i < m; i++){
-        cin >> u;
-        cin >> v;
-        cin >> w;
-        insertEdge(g,u,v,w);
-    }
-}
-
-bool edgeExist(Graph &g, int u, int v){
-    return g.vertice[u].adjacency.count(v);
+    g.edges[u][v] = weight;
 }
 
 bool findEdge(Graph &g, int u, int v, double &weight){
-    if (u == v) {
-        weight = 0;
+    if (g.edges[u][v]!=INFINITY)
+    {
+        weight = g.edges[u][v];
         return true;
     }
-    if (edgeExist(g, u, v)){
-        weight = g.vertice[u].adjacency[v];
-        return true;
-    };
+
     return false;
 }
 
 void showAsMatrix(Graph &g){
-    double weight;
-    bool find;
-    for (int i = 0; i < g.vertices; i++){
 
-        for (int j = 0; j < g.vertices; j++){
-            find = findEdge(g, i, j, weight);
-
-            if (find){
-                cout << weight << ",";
-            }else{
-                cout << '-' << ',';
+    for (int i = 0; i< g.u; i++)
+    {
+        for (int j = 0; j<g.u; j++)
+        {
+            if(i == j)
+            {
+                cout << "0,";
+                continue;
             }
+            if(g.edges[i][j]==INFINITY)
+            {
+                cout << "-,";
+                continue;
+            }
+            else
+            {
+                cout << g.edges[i][j] <<",";
+            }
+
         }
         cout << endl;
     }
 }
 
 void showAsArrayOfLists(Graph &g){
-    for (int i = 0; i < g.vertices; i++){
-        cout << i << ':';
-        for (    map<int, double>::iterator it = g.vertice[i].adjacency.begin(); it != g.vertice[i].adjacency.end(); it++){
-            cout << it->first << '(' << it ->second << "),";
+
+    for (int i = 0; i< g.u; i++)
+    {
+        cout << i << ":";
+        for (int j = 0; j< g.u; j++)
+        {
+            if (g.edges[i][j]!=INFINITY)
+            {
+                cout << j << "(" << g.edges[i][j] << "),";
+            }
         }
         cout << endl;
     }
 }
 
-void searchDepth(Graph &g, int current, bool visited[]){
-    visited[current] = true;
-    cout << current << ",";
+int shortestDistance(int dist[], bool sptSet[], int V)
+{
+    int min = INT_MAX, min_index;
 
-    for(map<int, double>::iterator it = g.vertice[current].adjacency.begin(); it != g.vertice[current].adjacency.end(); it++){
-        if (!visited[it->first]){
-            searchDepth(g, it->first, visited);
+    for (int v = 0; v < V; v++){
+        if (!sptSet[v] && dist[v] <= min){
+            min = dist[v], min_index = v;
         }
     }
+    return min_index;
 }
 
-void DFS(Graph &g, int current){
-    bool *visited = new bool[g.vertices];
-    for (int i = 0; i < g.vertices; i++){
-        visited[i] = false;
-    }
+void SSSP(Graph &g, int src)
+{
+    int dist[g.u];
 
-    searchDepth(g, current, visited);
+    bool sptSet[g.u];
 
-    cout << endl;
-}
+    for (int i = 0; i < g.u; i++)
+        dist[i] = INT_MAX, sptSet[i] = false;
 
-void BFS(Graph &g, int current){
-    bool *visited = new bool[g.vertices];
-    for(int i = 0; i < g.vertices; i++){
-        visited[i] = false;
-    }
-    list<int> queue;
-    visited[current] = true;
-    queue.push_back(current);
+    dist[src] = 0;
 
-    while(!queue.empty()) {
-        current = queue.front();
-        cout << current << ",";
-        queue.pop_front();
+    for (int count = 0; count < g.u-1; count++) {
+        int u = shortestDistance(dist, sptSet, g.u);
 
-        for(map<int, double>::iterator it = g.vertice[current].adjacency.begin(); it != g.vertice[current].adjacency.end(); it++) {
-            if(!visited[it->first]) {
-                visited[it->first] = true;
-                queue.push_back(it->first);
+        sptSet[u] = true;
+
+        for (int v = 0; v < g.u; v++){
+            if (!sptSet[v] && g.edges[u][v] && dist[u] != INT_MAX
+                && dist[u]+g.edges[u][v] < dist[v]){
+                dist[v] = dist[u] + g.edges[u][v];
             }
         }
     }
-    cout << endl;
+
+    for (int i = 0; i < g.u; i++){
+        printf("%d(%d)\n", i, dist[i]);
+    }
 }
 
 bool isCommand(const string command,const char *mnemonic){
@@ -183,14 +194,10 @@ int main(){
             loadGraph(graph[currentT],value,m);
             continue;
         }
-        if(isCommand(command,"BF"))
+
+        if(isCommand(command,"SS"))
         {
-            BFS(graph[currentT],value);
-            continue;
-        }
-        if(isCommand(command,"DF"))
-        {
-            DFS(graph[currentT],value);
+            SSSP(graph[currentT], value);
             continue;
         }
 
