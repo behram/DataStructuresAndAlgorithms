@@ -7,25 +7,26 @@ using namespace std;
 #define INFINITY 10000000
 
 struct Graph{
-    double * arr;
+    double * adjacencyM;
     int vertices;
 };
 
 double getWeight(Graph &g, int u, int v){
-    return g.arr[u*g.vertices + v];
+    return g.adjacencyM[u*g.vertices + v];
 }
+
 void insertEdge(Graph &g, int u, int v, double weight){
-    g.arr[u*g.vertices + v] = weight;
+    g.adjacencyM[u*g.vertices + v] = weight;
 }
 
 void loadGraph(Graph &g, int n, int m){
     g.vertices = n;
-    g.arr = new double[n*n];
+    g.adjacencyM = new double[n*n];
     for (int i = 0; i < n*n; i++){
         if (i/g.vertices == i% g.vertices)
-            g.arr[i] = 0;
+            g.adjacencyM[i] = 0;
         else
-            g.arr[i] = -1;
+            g.adjacencyM[i] = -1;
 
     }
     int u,v,w;
@@ -39,20 +40,20 @@ void loadGraph(Graph &g, int n, int m){
 
 
 bool findEdge(Graph &g, int u, int v, double &weight){
-    weight = g.arr[u*g.vertices + v];
+    weight = g.adjacencyM[u*g.vertices + v];
     return (weight > 0);
 }
 
 void showAsMatrix(Graph &g){
-    double d;
+    double doubleConst;
     for (int i = 0; i < g.vertices; i++){
         for (int j = 0; j < g.vertices; j++){
-            d = g.arr[i*g.vertices + j];
-            if (d < 0){
+            doubleConst = g.adjacencyM[i*g.vertices + j];
+            if (doubleConst < 0){
                 cout << '-' << ',';
+            } else{
+                cout << g.adjacencyM[i*g.vertices + j] << ',';
             }
-            else
-                cout << g.arr[i*g.vertices + j] << ',';
         }
         cout << endl;
     }
@@ -62,8 +63,8 @@ void showAsArrayOfLists(Graph &g){
     for (int i = 0; i < g.vertices; i++){
         cout << i << ":";
         for (int j = 0; j < g.vertices; j++){
-            if (g.arr[i*g.vertices+j]>0)
-                cout << j << '(' << g.arr[i*g.vertices+j] << "),";
+            if (g.adjacencyM[i*g.vertices+j]>0)
+                cout << j << '(' << g.adjacencyM[i*g.vertices+j] << "),";
         }
         cout << endl;
     }
@@ -109,7 +110,6 @@ int main(){
             showAsMatrix(graph[currentT]);
             continue;
         }
-
         if(isCommand(command,"SA"))
         {
             showAsArrayOfLists(graph[currentT]);
